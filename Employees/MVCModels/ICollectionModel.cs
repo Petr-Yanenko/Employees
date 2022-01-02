@@ -5,8 +5,8 @@ namespace Employees.MVCModels
 {
     public interface ICollectionModel<T> : IModel
     {
-        public T[] CopyData();
-        public void Append(T item);
-        public void Delete(T item);
+        public T[] CopyData(Object client);
+        public void Append(T item, Object client);
+        public void Delete(T item, Object client);
     }
 }

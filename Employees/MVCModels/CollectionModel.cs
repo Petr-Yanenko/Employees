@@ -19,55 +19,55 @@ namespace Employees.MVCModels
 
         public CollectionModel()
         {
-            LoadData();
+            LoadData(null);
         }
 
-        public override void LoadData()
+        public override void LoadData(Object client)
         {
-            base.LoadData();
-            _worker.EnQueueTask(() => FetchData());
+            base.LoadData(client);
+            _worker.EnQueueTask(() => FetchData(client));
         }
 
-        public T[] CopyData()
+        public T[] CopyData(Object client)
         {
             return _copy.ToArray();
         }
 
-        public void Append(T item)
+        public void Append(T item, Object client)
         {
-            _worker.EnQueueTask(() => AppendItem(item));
+            _worker.EnQueueTask(() => AppendItem(item, client));
         }
 
-        public void Delete(T item)
+        public void Delete(T item, Object client)
         {
-            _worker.EnQueueTask(() => DeleteItem(item));
+            _worker.EnQueueTask(() => DeleteItem(item, client));
         }
 
-        protected virtual void FetchData()
+        protected virtual void FetchData(Object client)
         {
             _list = FetchList().Result;
-            SetCopy();
+            SetCopy(client);
 
         }
 
         protected abstract Task<List<T>> FetchList();
 
-        protected virtual void AppendItem(T item)
+        protected virtual void AppendItem(T item, Object client)
         {
             T employee = InsertItem(item).Result;
             if (employee != null)
             {
                 _list.Add(employee);
-                SetCopy();
+                SetCopy(client);
             }
         }
 
-        protected virtual void DeleteItem(T item)
+        protected virtual void DeleteItem(T item, Object client)
         {
             if (DeleteFromStore(item).Result)
             {
                 _list.Remove(item);
-                SetCopy();
+                SetCopy(client);
             }
         }
 
@@ -86,10 +86,10 @@ namespace Employees.MVCModels
 
         protected abstract T CopyItem(T item);
 
-        protected void SetCopy()
+        protected void SetCopy(Object client)
         {
             _copy = CopyList();
-            OnChanged();
+            OnChanged(client);
         }
 
         protected abstract Task<T> InsertItem(T item);

@@ -10,14 +10,14 @@ namespace Employees.MVCModels
     }
 
 
-    public delegate void NewDataHandler(bool newData);
-    public delegate void ErrorHandler(ErrorCode code);
+    public delegate void NewDataHandler(bool newData, Object client);
+    public delegate void ErrorHandler(ErrorCode code, Object client);
 
     public interface IModel
     {
         public event NewDataHandler NewData;
         public event ErrorHandler Error;
 
-        public void LoadData();
+        public void LoadData(Object client);
     }
 }

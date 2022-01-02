@@ -10,18 +10,18 @@ namespace Employees.MVCModels
         public event ErrorHandler Error;
 
 
-        public virtual void LoadData()
+        public virtual void LoadData(Object client)
         {
         }
 
-        protected void OnChanged()
+        protected void OnChanged(Object client)
         {
-            NewData(true);
+            NewData(true, client);
         }
 
-        protected void OnError(ErrorCode code)
+        protected void OnError(ErrorCode code, Object client)
         {
-            Error(code);
+            Error(code, client);
         }
     }
 }
