@@ -10,20 +10,8 @@ namespace Employees.MVCModels
         public event ErrorHandler Error;
 
 
-        public BaseModel()
-        {
-        }
-
         public virtual void LoadData()
         {
-        }
-
-        public virtual void Reset()
-        {
-        }
-
-        public virtual void Cancel()
-        { 
         }
 
         protected void OnChanged()

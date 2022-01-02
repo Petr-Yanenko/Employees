@@ -19,7 +19,5 @@ namespace Employees.MVCModels
         public event ErrorHandler Error;
 
         public void LoadData();
-        public void Reset();
-        public void Cancel();
     }
 }

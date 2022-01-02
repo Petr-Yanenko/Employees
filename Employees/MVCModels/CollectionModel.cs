@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,15 +11,24 @@ namespace Employees.MVCModels
 {
     public abstract class CollectionModel<T> : BaseModel, ICollectionModel<T>
     {
-        protected BlockingCollection<T> _copy = new BlockingCollection<T>();
-        protected List<T> _list = new List<T>();
+        protected ImmutableList<T> _copy;
+        protected List<T> _list;
 
         protected ActiveObject _worker = new ActiveObject();
 
 
         public CollectionModel()
         {
-            _worker.QueueTask(() => FetchData());
+            _list = new List<T>();
+            _copy = _list.ToImmutableList();
+
+            LoadData();
+        }
+
+        public override void LoadData()
+        {
+            base.LoadData();
+            _worker.EnQueueTask(() => FetchData());
         }
 
         public T[] CopyData()
@@ -27,12 +38,12 @@ namespace Employees.MVCModels
 
         public void Append(T item)
         {
-            _worker.QueueTask(() => AppendItem(item));
+            _worker.EnQueueTask(() => AppendItem(item));
         }
 
         public void Delete(T item)
         {
-            _worker.QueueTask(() => DeleteItem(item));
+            _worker.EnQueueTask(() => DeleteItem(item));
         }
 
         protected virtual void FetchData()
@@ -63,17 +74,16 @@ namespace Employees.MVCModels
             }
         }
 
-        protected BlockingCollection<T> CopyList()
+        protected ImmutableList<T> CopyList()
         {
-            BlockingCollection<T> copy = new BlockingCollection<T>();
+            List<T> copy = new List<T>();
 
             foreach (T data in _list)
             {
                 copy.Add(CopyItem(data));
             }
-            copy.CompleteAdding();
 
-            return copy;
+            return copy.ToImmutableList();
         }
 
         protected abstract T CopyItem(T item);
@@ -93,8 +103,9 @@ namespace Employees.MVCModels
 
         public class ActiveObject
         {
-            protected List<ModelTask> _tasks = new List<ModelTask>();
-            private Object _lock = new Object();
+            //protected List<ModelTask> _tasks = new List<ModelTask>();
+            //private Object _lock = new Object();
+            protected BlockingCollection<ModelTask> _tasks = new BlockingCollection<ModelTask>();
             private Thread _thread;
             private static AutoResetEvent _evnt = new AutoResetEvent(true);
 
@@ -109,7 +120,7 @@ namespace Employees.MVCModels
                 while(true)
                 {
                     _evnt.WaitOne();
-                    ModelTask task = EnqueueTask();
+                    ModelTask task = DequeueTask();
                     if (task != null)
                     {
                         task();
@@ -117,30 +128,32 @@ namespace Employees.MVCModels
                 }
             }
 
-            public void QueueTask(ModelTask task)
+            public void EnQueueTask(ModelTask task)
             {
-                lock (_lock)
-                {
-                    _tasks.Add(task);
-                    _evnt.Set();
-                }
+                //lock (_lock)
+                //{
+                //    _tasks.Add(task);
+                //    _evnt.Set();
+                //}
+                _tasks.Add(task);
             }
 
-            public ModelTask EnqueueTask()
+            ModelTask DequeueTask()
             {
-                lock (_lock)
-                {
-                    int count = _tasks.Count;
-                    if (count > 0)
-                    {
-                        ModelTask next = _tasks[0];
-                        _tasks.RemoveAt(0);
+                //lock (_lock)
+                //{
+                //    int count = _tasks.Count;
+                //    if (count > 0)
+                //    {
+                //        ModelTask next = _tasks[0];
+                //        _tasks.RemoveAt(0);
 
-                        return next;
-                    }
+                //        return next;
+                //    }
 
-                    return null;
-                }
+                //    return null;
+                //}
+                return _tasks.Take();
             }
         }
     }
