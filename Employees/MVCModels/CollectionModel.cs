@@ -121,7 +121,15 @@ namespace Employees.MVCModels
             public ActiveObject()
             {
                 _thread = new Thread(Start);
-                _thread.Start();
+                try
+                {
+                    _thread.Start();
+                }
+                catch(Exception ex)
+                {
+                    GlobalDataContext.GetInstance().HandleException(ex);
+                    throw ex;
+                }
             }
 
             private void Start()

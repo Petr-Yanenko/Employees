@@ -22,6 +22,7 @@ namespace Employees
             catch(Exception ex)
             {
                 GlobalDataContext.GetInstance().HandleException(ex);
+                throw ex;
             }
         }
 
@@ -35,8 +36,6 @@ namespace Employees
 
     public class GlobalDataContext
     {
-        //public const string kTitleKey = "Title";
-
         static private GlobalDataContext _instance = new GlobalDataContext();
 
         public EmployeesModel Model { get; } = new EmployeesModel();
