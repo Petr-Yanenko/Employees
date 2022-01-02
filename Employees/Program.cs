@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Employees.Data;
+using Employees.MVCModels;
 
 
 namespace Employees
@@ -15,7 +15,14 @@ namespace Employees
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            try
+            {
+                CreateHostBuilder(args).Build().Run();
+            }
+            catch(Exception ex)
+            {
+                GlobalDataContext.GetInstance().HandleException(ex);
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -28,14 +35,24 @@ namespace Employees
 
     public class GlobalDataContext
     {
+        //public const string kTitleKey = "Title";
+
         static private GlobalDataContext _instance = new GlobalDataContext();
 
-        public EmployeeContext Context { get; set; }
+        public EmployeesModel Model { get; } = new EmployeesModel();
 
 
         static public GlobalDataContext GetInstance()
         {
             return _instance;
+        }
+
+        public void HandleError(ErrorCode code)
+        {
+        }
+
+        public void HandleException(Exception ex)
+        {
         }
     }
 }

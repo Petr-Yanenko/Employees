@@ -16,12 +16,14 @@ namespace Employees.MVCModels
 
         protected void OnChanged(Object client)
         {
-            NewData(true, client);
+            if (NewData != null)
+                NewData(true, client);
         }
 
         protected void OnError(ErrorCode code, Object client)
         {
-            Error(code, client);
+            if (Error != null)
+                Error(code, client);
         }
     }
 }

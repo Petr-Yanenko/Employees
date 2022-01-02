@@ -7,21 +7,16 @@ using Employees.Data;
 
 namespace Employees.MVCModels
 {
-    public class EmployeesModel<IEmpoyeeModel> : CollectionModel<IEmployeeModel>
-    {
-        static private EmployeesModel<IEmployeeModel> _instance = new EmployeesModel<IEmployeeModel>();
+    public class EmployeesModel : CollectionModel<IEmployeeModel>
+    { 
+        private DataManager _manager = new DataManager();
 
-        private DataManager _manager = new DataManager(GlobalDataContext.GetInstance().Context);
-
-
-        static public EmployeesModel<IEmployeeModel> GetInstance()
-        {
-            return _instance;
-        }
 
         protected override async Task<List<IEmployeeModel>> FetchList()
         {
-            return await _manager.GetEmployees();
+            List<IEmployeeModel> employees = await _manager.GetEmployees();
+
+            return employees;
         }
 
         protected override IEmployeeModel CopyItem(IEmployeeModel item)

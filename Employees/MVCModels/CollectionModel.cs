@@ -43,18 +43,28 @@ namespace Employees.MVCModels
             _worker.EnQueueTask(() => DeleteItem(item, client));
         }
 
-        protected virtual void FetchData(Object client)
+        protected virtual async void FetchData(Object client)
         {
-            _list = FetchList().Result;
+            Task<List<T>> dataTask = FetchList();
+
+            _list = await dataTask;
+
+            if (_list == null)
+            {
+                _list = new List<T>();
+            }
+
             SetCopy(client);
 
         }
 
         protected abstract Task<List<T>> FetchList();
 
-        protected virtual void AppendItem(T item, Object client)
+        protected virtual async void AppendItem(T item, Object client)
         {
-            T employee = InsertItem(item).Result;
+            Task<T> employeeTask = InsertItem(item);
+            T employee = await employeeTask;
+
             if (employee != null)
             {
                 _list.Add(employee);
@@ -62,9 +72,12 @@ namespace Employees.MVCModels
             }
         }
 
-        protected virtual void DeleteItem(T item, Object client)
+        protected virtual async void DeleteItem(T item, Object client)
         {
-            if (DeleteFromStore(item).Result)
+            Task<bool> deletedTask = DeleteFromStore(item);
+            bool deleted = await deletedTask;
+
+            if (deleted)
             {
                 _list.Remove(item);
                 SetCopy(client);
@@ -101,23 +114,20 @@ namespace Employees.MVCModels
 
         public class ActiveObject
         {
-            //protected List<ModelTask> _tasks = new List<ModelTask>();
-            //private Object _lock = new Object();
             protected BlockingCollection<ModelTask> _tasks = new BlockingCollection<ModelTask>();
             private Thread _thread;
-            private static AutoResetEvent _evnt = new AutoResetEvent(true);
 
 
             public ActiveObject()
             {
-                _thread = new Thread(this.Start);
+                _thread = new Thread(Start);
+                _thread.Start();
             }
 
             private void Start()
             {
                 while(true)
                 {
-                    _evnt.WaitOne();
                     ModelTask task = DequeueTask();
                     if (task != null)
                     {
@@ -128,29 +138,11 @@ namespace Employees.MVCModels
 
             public void EnQueueTask(ModelTask task)
             {
-                //lock (_lock)
-                //{
-                //    _tasks.Add(task);
-                //    _evnt.Set();
-                //}
                 _tasks.Add(task);
             }
 
             ModelTask DequeueTask()
             {
-                //lock (_lock)
-                //{
-                //    int count = _tasks.Count;
-                //    if (count > 0)
-                //    {
-                //        ModelTask next = _tasks[0];
-                //        _tasks.RemoveAt(0);
-
-                //        return next;
-                //    }
-
-                //    return null;
-                //}
                 return _tasks.Take();
             }
         }

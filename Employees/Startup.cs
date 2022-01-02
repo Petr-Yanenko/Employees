@@ -26,16 +26,12 @@ namespace Employees
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-
-            services.AddDbContext<EmployeeContext>(options =>
-                    options.UseSqlite(Configuration.GetConnectionString("EmployeeContext")));
+            GlobalDataContext.GetInstance();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, EmployeeContext context, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            GlobalDataContext.GetInstance().Context = context;
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

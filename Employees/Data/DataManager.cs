@@ -13,9 +13,13 @@ namespace Employees.Data
     {
         private EmployeeContext _context;
 
-        public DataManager(EmployeeContext context)
+        public DataManager()
         {
-            _context = context;
+            string connectionString = "Data Source=EmployeeContext.db";
+            var contextOptions = new DbContextOptionsBuilder<EmployeeContext>()
+                .UseSqlite(connectionString).Options;
+
+            _context = new EmployeeContext(contextOptions);
         }
 
         public async Task<List<IEmployeeModel>> GetEmployees()
