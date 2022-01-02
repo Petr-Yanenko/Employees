@@ -58,10 +58,15 @@ namespace Employees.Data
 
         public async Task<bool> RemoveEmployee(IEmployeeModel employee)
         {
-            EntityEntry removeRes = _context.Remove<EmployeeModel>((EmployeeModel)employee);
-            await _context.SaveChangesAsync();
+            if (employee != null)
+            {
+                EntityEntry removeRes = _context.Remove<EmployeeModel>((EmployeeModel)employee);
+                await _context.SaveChangesAsync();
 
-            return removeRes.State == EntityState.Deleted;
+                return removeRes.State == EntityState.Detached;
+            }
+
+            return false;
         }
     }
 }

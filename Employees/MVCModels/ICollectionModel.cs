@@ -7,6 +7,6 @@ namespace Employees.MVCModels
     {
         public T[] CopyData(Object client);
         public void Append(T item, Object client);
-        public void Delete(T item, Object client);
+        public void Delete(int id, Object client);
     }
 }

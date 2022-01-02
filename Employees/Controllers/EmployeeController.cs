@@ -36,6 +36,7 @@ namespace Employees.Controllers
                 if (client == this)
                 {
                     GlobalDataContext.GetInstance().HandleError(error);
+                    _evnt.Set();
                 }
             };
 
@@ -96,6 +97,34 @@ namespace Employees.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return View(employee);
+        }
+
+        // GET: Employees/Delete/5
+        public IActionResult Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var employee = _model.CopyData(this).FirstOrDefault(item => item.Id == id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            return View(employee);
+        }
+
+        // POST: Employees/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            _model.Delete(id, this);
+            _evnt.WaitOne();
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

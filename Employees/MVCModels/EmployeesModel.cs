@@ -31,9 +31,12 @@ namespace Employees.MVCModels
             return employee;
         }
 
-        protected override async Task<bool> DeleteFromStore(IEmployeeModel item)
+        protected override async Task<IEmployeeModel> DeleteFromStore(int id)
         {
-            return await _manager.RemoveEmployee(item);
+            IEmployeeModel employee = _list.Find(employee => employee.Id == id);
+            bool deleted = await _manager.RemoveEmployee(employee);
+
+            return deleted ? employee : null;
         }
     }
 }

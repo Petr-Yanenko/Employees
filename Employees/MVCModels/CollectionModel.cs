@@ -38,9 +38,9 @@ namespace Employees.MVCModels
             _worker.EnQueueTask(() => AppendItem(item, client));
         }
 
-        public void Delete(T item, Object client)
+        public void Delete(int id, Object client)
         {
-            _worker.EnQueueTask(() => DeleteItem(item, client));
+            _worker.EnQueueTask(() => DeleteItem(id, client));
         }
 
         protected virtual async void FetchData(Object client)
@@ -72,14 +72,14 @@ namespace Employees.MVCModels
             }
         }
 
-        protected virtual async void DeleteItem(T item, Object client)
+        protected virtual async void DeleteItem(int id, Object client)
         {
-            Task<bool> deletedTask = DeleteFromStore(item);
-            bool deleted = await deletedTask;
+            Task<T> deletedTask = DeleteFromStore(id);
+            T deleted = await deletedTask;
 
-            if (deleted)
+            if (deleted != null)
             {
-                _list.Remove(item);
+                _list.Remove(deleted);
                 SetCopy(client);
             }
         }
@@ -107,7 +107,7 @@ namespace Employees.MVCModels
 
         protected abstract Task<T> InsertItem(T item);
         
-        protected abstract Task<bool> DeleteFromStore(T item);
+        protected abstract Task<T> DeleteFromStore(int id);
 
 
         public delegate void ModelTask();
