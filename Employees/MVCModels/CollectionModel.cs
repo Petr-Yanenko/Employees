@@ -11,17 +11,14 @@ namespace Employees.MVCModels
 {
     public abstract class CollectionModel<T> : BaseModel, ICollectionModel<T>
     {
-        protected ImmutableList<T> _copy;
-        protected List<T> _list;
+        protected BlockingCollection<T> _copy = new BlockingCollection<T>();
+        protected List<T> _list = new List<T>();
 
         protected ActiveObject _worker = new ActiveObject();
 
 
         public CollectionModel()
         {
-            _list = new List<T>();
-            _copy = _list.ToImmutableList();
-
             LoadData();
         }
 
@@ -74,16 +71,17 @@ namespace Employees.MVCModels
             }
         }
 
-        protected ImmutableList<T> CopyList()
+        protected BlockingCollection<T> CopyList()
         {
-            List<T> copy = new List<T>();
+            BlockingCollection<T> copy = new BlockingCollection<T>();
 
             foreach (T data in _list)
             {
                 copy.Add(CopyItem(data));
             }
+            copy.CompleteAdding();
 
-            return copy.ToImmutableList();
+            return copy;
         }
 
         protected abstract T CopyItem(T item);
