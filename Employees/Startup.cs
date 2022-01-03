@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using Employees.Data;
 
 namespace Employees
 {
@@ -24,6 +26,7 @@ namespace Employees
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            GlobalDataContext.GetInstance();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -39,6 +42,8 @@ namespace Employees
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            app.UseStatusCodePages();
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -50,7 +55,7 @@ namespace Employees
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Employees}/{action=Index}/{id?}");
             });
         }
     }
