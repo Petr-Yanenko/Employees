@@ -25,7 +25,7 @@ namespace Employees.MVCModels
         public override void LoadData(Object client)
         {
             base.LoadData(client);
-            _worker.EnQueueTask(() => FetchData(client));
+            _worker.EnqueueTask(() => FetchData(client));
         }
 
         public T[] CopyData(Object client)
@@ -35,12 +35,31 @@ namespace Employees.MVCModels
 
         public void Append(T item, Object client)
         {
-            _worker.EnQueueTask(() => AppendItem(item, client));
+            _worker.EnqueueTask(() => AppendItem(item, client));
+        }
+
+        public void RequestDeleting(int id, Object client)
+        {
+            _worker.EnqueueTask(() => RequestDeletingItem(id, client));
         }
 
         public void Delete(int id, Object client)
         {
-            _worker.EnQueueTask(() => DeleteItem(id, client));
+            _worker.EnqueueTask(() => DeleteItem(id, client));
+        }
+
+        public long RequestUpdating(T item, Object client)
+        {
+            long milliseconds = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
+            _worker.EnqueueTask(() => RequestUpdating(item, milliseconds, client));
+
+            return milliseconds;
+        }
+
+        public void Update(T item, long timeStamp, Object client)
+        {
+            _worker.EnqueueTask(() => UpdateItem(item, timeStamp, client));
         }
 
         protected virtual async void FetchData(Object client)
@@ -70,7 +89,13 @@ namespace Employees.MVCModels
                 _list.Add(employee);
                 SetCopy(client);
             }
+            else
+            {
+                OnError(ErrorCode.UnknownError, client);
+            }
         }
+
+        protected abstract void RequestDeletingItem(int id, Object client);
 
         protected virtual async void DeleteItem(int id, Object client)
         {
@@ -82,7 +107,15 @@ namespace Employees.MVCModels
                 _list.Remove(deleted);
                 SetCopy(client);
             }
+            else
+            {
+                OnError(ErrorCode.ResourceMissing, client);
+            }
         }
+
+        protected abstract void RequestUpdating(T item, long timeStamp, Object client);
+
+        protected abstract void UpdateItem(T item, long timeStamp, Object client);
 
         protected BlockingCollection<T> CopyList()
         {
@@ -144,7 +177,7 @@ namespace Employees.MVCModels
                 }
             }
 
-            public void EnQueueTask(ModelTask task)
+            public void EnqueueTask(ModelTask task)
             {
                 _tasks.Add(task);
             }

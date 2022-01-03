@@ -15,7 +15,7 @@ namespace Employees.Models
         public DateTime DateOfBirth { get; }
         public string Position { get; }
 
-        public EmployeeModel Copy();
+        public IEmployeeModel Copy();
     }
 
     public class EmployeeModel : IEmployeeModel
@@ -29,7 +29,7 @@ namespace Employees.Models
         public DateTime DateOfBirth { get; set; }
         public string Position { get; set; }
 
-        public EmployeeModel Copy()
+        public IEmployeeModel Copy()
         {
             EmployeeModel copy = new EmployeeModel();
 

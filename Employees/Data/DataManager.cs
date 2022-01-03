@@ -58,15 +58,63 @@ namespace Employees.Data
 
         public async Task<bool> RemoveEmployee(IEmployeeModel employee)
         {
-            if (employee != null)
+            return await DoOperationOnContext(employee, EntityState.Deleted, item =>
             {
-                EntityEntry removeRes = _context.Remove<EmployeeModel>((EmployeeModel)employee);
-                await _context.SaveChangesAsync();
+                return _context.Remove(item);
+            });
+        }
 
-                return removeRes.State == EntityState.Detached;
+        public async Task<bool> UpdateEmployee(IEmployeeModel employee, IEmployeeModel updated)
+        {
+            IEmployeeModel old = employee.Copy();
+            ChangeEmployee(employee, updated);
+
+            bool updateRes = await DoOperationOnContext(employee, EntityState.Modified, item =>
+            {
+                return _context.Update(item);
+            });
+
+            if (!updateRes)
+            {
+                ChangeEmployee(employee, old);
+            }
+
+            return updateRes;
+        }
+
+        delegate EntityEntry ContextOperation(IEmployeeModel item);
+
+        private async Task<bool> DoOperationOnContext(
+            IEmployeeModel item,
+            EntityState state,
+            ContextOperation operation)
+        {
+            if (item != null)
+            {
+                EntityEntry updateRes = operation(item);
+                if (updateRes.State == state)
+                {
+                    int updatedNum = await _context.SaveChangesAsync();
+
+                    return updatedNum > 0;
+                }
             }
 
             return false;
+        }
+
+        private void ChangeEmployee(IEmployeeModel employee, IEmployeeModel update)
+        {
+            EmployeeModel changed = (EmployeeModel)employee;
+
+            if (changed != null)
+            {
+                changed.FirstName = update.FirstName;
+                changed.LastName = update.LastName;
+                changed.Patronymic = update.Patronymic;
+                changed.DateOfBirth = update.DateOfBirth;
+                changed.Position = update.Position;
+            }
         }
     }
 }

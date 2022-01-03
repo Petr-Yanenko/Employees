@@ -36,6 +36,9 @@ namespace Employees
 
     public class GlobalDataContext
     {
+        public const int kUpdateTimeout = 1000 * 60 * 2;
+        public const string kTitleKey = "Title";
+
         static private GlobalDataContext _instance = new GlobalDataContext();
 
         public EmployeesModel Model { get; } = new EmployeesModel();

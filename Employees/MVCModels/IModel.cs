@@ -7,6 +7,8 @@ namespace Employees.MVCModels
     {
         NoError = -1,
         UnknownError = 0,
+        UpdateDeclined = 1,
+        ResourceMissing = 2,
     }
 
 
