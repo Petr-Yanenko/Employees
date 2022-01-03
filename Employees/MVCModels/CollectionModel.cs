@@ -95,7 +95,19 @@ namespace Employees.MVCModels
             }
         }
 
-        protected abstract void RequestDeletingItem(int id, Object client);
+        protected virtual void RequestDeletingItem(int id, Object client)
+        {
+            T found = FindUpdatedItem(id);
+
+            if (found != null)
+            {
+                OnError(ErrorCode.ResourceBusy, client);
+            }
+            else
+            {
+                OnChanged(client);
+            }
+        }
 
         protected virtual async void DeleteItem(int id, Object client)
         {
@@ -141,6 +153,8 @@ namespace Employees.MVCModels
         protected abstract Task<T> InsertItem(T item);
         
         protected abstract Task<T> DeleteFromStore(int id);
+
+        protected abstract T FindUpdatedItem(int id);
 
 
         public delegate void ModelTask();

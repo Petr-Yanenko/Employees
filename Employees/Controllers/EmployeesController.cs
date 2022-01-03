@@ -104,7 +104,7 @@ namespace Employees.Controllers
             _model.RequestDeleting((int)id, this);
             _evnt.WaitOne();
 
-            return GetViewResult(employee);
+            return GetViewResult(() => View(employee));
         }
 
         // POST: Employees/Delete/5
@@ -115,7 +115,7 @@ namespace Employees.Controllers
             _model.Delete(id, this);
             _evnt.WaitOne();
 
-            return RedirectToAction(nameof(Index));
+            return GetViewResult(() => RedirectToAction(nameof(Index)));
         }
 
         // GET: Employees/Edit/5
@@ -130,7 +130,7 @@ namespace Employees.Controllers
             long timeStamp = _model.RequestUpdating(employee, this);
             _evnt.WaitOne();
 
-            return GetViewResult(new EmployeeDecorator(employee, timeStamp));
+            return GetViewResult(() => View(new EmployeeDecorator(employee, timeStamp)));
         }
 
         // POST: Employees/Edit/5
@@ -165,17 +165,19 @@ namespace Employees.Controllers
             return _model.CopyData(this).FirstOrDefault(item => item.Id == id);
         }
 
-        private IActionResult GetViewResult(Object obj)
+        delegate IActionResult GetSuccessViewResult();
+
+        private IActionResult GetViewResult(GetSuccessViewResult success)
         {
             if (_errorCode == ErrorCode.NoError)
             {
-                return View(obj);
+                return success();
             }
             else if (_errorCode == ErrorCode.ResourceMissing)
             {
                 return Conflict();
             }
-            else if (_errorCode == ErrorCode.UpdateDeclined)
+            else if (_errorCode == ErrorCode.ResourceBusy)
             {
                 return Conflict();
             }

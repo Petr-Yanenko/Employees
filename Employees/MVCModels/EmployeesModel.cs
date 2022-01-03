@@ -34,20 +34,6 @@ namespace Employees.MVCModels
             return employee;
         }
 
-        protected override void RequestDeletingItem(int id, Object client)
-        {
-            EmployeeDecorator found = FindUpdatedEmployee(id);
-
-            if (found != null)
-            {
-                OnError(ErrorCode.UpdateDeclined, client);
-            }
-            else
-            {
-                OnChanged(client);
-            }
-        }
-
         protected override async Task<IEmployeeModel> DeleteFromStore(int id)
         {
             EmployeeDecorator found = FindUpdatedEmployee(id);
@@ -81,7 +67,7 @@ namespace Employees.MVCModels
                 return;
             }
 
-            OnError(ErrorCode.UpdateDeclined, client);
+            OnError(ErrorCode.ResourceBusy, client);
         }
 
         protected override async void UpdateItem(IEmployeeModel item, long timeStamp, Object client)
@@ -105,7 +91,12 @@ namespace Employees.MVCModels
                 return;
             }
 
-            OnError(ErrorCode.UpdateDeclined, client);
+            OnError(ErrorCode.ResourceBusy, client);
+        }
+
+        protected override IEmployeeModel FindUpdatedItem(int id)
+        {
+            return FindUpdatedEmployee(id);
         }
 
         private bool CheckTimeStamp(long timeStamp, EmployeeDecorator item)
